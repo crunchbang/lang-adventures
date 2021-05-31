@@ -1,0 +1,6 @@
+1. Unsigned integers cycle through the list of available 
+   values.
+
+For example:
+  signed_int ranges from -2147483648 to 2147483647
+  So 2147483647 + 1 results in -2147483648

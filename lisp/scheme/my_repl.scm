@@ -1,0 +1,11 @@
+(define (my-repl)
+  (display "mine>")
+  (let ((expr (read)))
+    (cond ((eq? expr 'halt)
+           (display "Halting")
+           (newline))
+          (else
+            (write (eval expr))
+            (newline)
+            (my-repl)))))
+(my-repl)
