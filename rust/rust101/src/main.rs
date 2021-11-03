@@ -1,4 +1,4 @@
-use core::cmp::min;
+use self::SomethingOrNothing::{Nothing, Something};
 
 fn main() {
     let v = read_numbers();
@@ -11,54 +11,98 @@ fn main() {
 
     let v3 = read_numbers();
     vec_print(v3);
+
+    let r4 = vec_min(vec![11.0, 1.2, 2.3, 3.4, 4.5]);
+    r4.print();
 }
 
-enum NumberOrNothing {
-    Number(i32),
+trait Minimum {
+    fn min(self, b: Self) -> Self;
+}
+
+impl Minimum for i32 {
+    fn min(self, b: Self) -> Self {
+        if self < b {
+            self
+        } else {
+            b
+        }
+    }
+}
+
+impl Minimum for f32 {
+    fn min(self, b: Self) -> Self {
+        if self < b {
+            self
+        } else {
+            b
+        }
+    }
+}
+
+enum SomethingOrNothing<T> {
+    Something(T),
     Nothing,
+}
+
+impl<T> SomethingOrNothing<T> {
+    fn new(o: Option<T>) -> Self {
+        match o {
+            Some(x) => Something(x),
+            None => Nothing,
+        }
+    }
+
+    fn to_option(self) -> Option<T> {
+        match self {
+            Something(x) => Some(x),
+            Nothing => None,
+        }
+    }
+}
+
+type NumberOrNothing = SomethingOrNothing<i32>;
+
+impl SomethingOrNothing<f32> {
+    fn print(self) {
+        match self {
+            Nothing => println!("The list is empty"),
+            Something(x) => println!("Value is {}", x),
+        }
+    }
 }
 
 impl NumberOrNothing {
     fn print(self) {
         match self {
-            NumberOrNothing::Nothing => println!("The list is empty"),
-            NumberOrNothing::Number(x) => println!("Value is {}", x),
-        }
-    }
-
-    fn number_or_default(self, default: i32) -> i32 {
-        match self {
-            NumberOrNothing::Nothing => default,
-            NumberOrNothing::Number(x) => x,
+            Nothing => println!("The list is empty"),
+            Something(x) => println!("Value is {}", x),
         }
     }
 }
 
 fn read_numbers() -> Vec<i32> {
-    vec![2, 18, -1]
+    vec![18, 5, 7, 3, 9, 27]
 }
 
-fn vec_min(vec: Vec<i32>) -> NumberOrNothing {
-    let mut min_num = NumberOrNothing::Nothing;
+fn vec_min<T: Minimum>(vec: Vec<T>) -> SomethingOrNothing<T> {
+    let mut min = Nothing;
 
-    use self::NumberOrNothing::{Nothing, Number};
-    for n in vec {
-        min_num = match min_num {
-            Nothing => Number(n),
-            Number(x) => Number(min(x, n)),
+    for e in vec {
+        min = match min {
+            Nothing => Something(e),
+            Something(x) => Something(x.min(e)),
         }
     }
-    min_num
+    min
 }
 
 fn vec_sum(vec: Vec<i32>) -> NumberOrNothing {
-    use self::NumberOrNothing::{Nothing, Number};
-
     let mut result = Nothing;
     for e in vec {
         result = match result {
-            Nothing => Number(e),
-            Number(x) => Number(x + e),
+            Nothing => Something(e),
+            Something(x) => Something(x + e),
         };
     }
     result
